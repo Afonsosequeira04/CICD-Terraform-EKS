@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACESS_KEY')
+        AWS_DEFAULT_REGION    = 'us-east-2'
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                script {
+                    checkout scmGit(
+                        branches: [[name: '*/master']],
+                        extensions: [],
+                        userRemoteConfigs: [[url: 'https://github.com/Afonsosequeira04/CICD-Terraform-EKS.git']]
+                    )
+                }
+            }
+        }
+
+        stage('Initializing Terraform') {
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform init'
+                    }
+                }
+            }
+        }
+
+        stage('Formatting Terraform Files') {
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform fmt'
+                    }
+                }
+            }
+        }
+
+        stage('Validating Terraform Files') {
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform validate'
+                    }
+                }
+            }
+        }
+        
+        stage('Planing') {
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform plan'
+                    }
+                }
+            }
+        }
+        
+        stage('Creating an EKS Cluster') {
+            steps {
+                script {
+                    dir('EKS') {
+                        sh 'terraform $action --auto-approve'
+                    }
+                }
+            }
+        }
+        
+        stage('Deploying Nginx') {
+            steps {
+                script {
+                    dir('EKS/configuration-files') {
+                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
+                        sh 'kubectl apply -f deployment.yml'
+                        sh 'kubectl apply -f service.yml'
+                    }
+                }
+            }
+        }
+   
+    }
+}

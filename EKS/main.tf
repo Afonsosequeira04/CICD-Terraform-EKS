@@ -28,7 +28,9 @@ module "vpc" {
 }
 
 module "eks" {
-  source                         = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
+  version = "~> 19.0"  
+
   cluster_name                   = "my-eks-cluster"
   cluster_version                = "1.29"
   cluster_endpoint_public_access = true
@@ -43,11 +45,27 @@ module "eks" {
       instance_types = var.instance_types
     }
   }
+
+  access_entries = {
+    my-afonso-user = {
+      principal_arn = "arn:aws:iam::097648937889:user/My-Afonso-IAM-User"
+      policy_associations = {
+        cluster-admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
+
   tags = {
     Environment = "dev"
     Terraform   = "true"
   }
 }
+
 
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_name

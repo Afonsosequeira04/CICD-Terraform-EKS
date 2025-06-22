@@ -50,7 +50,7 @@ pipeline {
             }
         }
         
-        stage('Planing') {
+        stage('Planning') {
             steps {
                 script {
                     dir('EKS') {
@@ -72,20 +72,18 @@ pipeline {
         
         stage('Deploying Nginx') {
             steps {
-                script {
-                    
-                dir('EKS/configuration-files') {
-                            sh '''
-                                aws eks update-kubeconfig --name my-eks-cluster
-                                kubectl apply -f deployment.yml --validate=false || true
-                                kubectl apply -f service.yml --validate=false || true
-                            '''
-                        }
-                    }
+                dir('EKS/configuration-files') {  // Correct placement of `dir` block
+                    sh '''
+                        aws eks update-kubeconfig --name my-eks-cluster
+                        kubectl apply -f deployment.yml --validate=false || true
+                        kubectl apply -f service.yml --validate=false || true
+                    '''
                 }
             }
         }
    
     }
+}
+
 
 

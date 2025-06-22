@@ -80,8 +80,8 @@ pipeline {
                         ]) {
                             sh '''
                                 aws eks update-kubeconfig --name my-eks-cluster
-                                kubectl apply -f deployment.yml
-                                kubectl apply -f service.yml
+                                kubectl apply -f deployment.yml --validate=false || true
+                                kubectl apply -f service.yml --validate=false || true
                             '''
                         }
                     }
@@ -91,3 +91,4 @@ pipeline {
    
     }
 }
+

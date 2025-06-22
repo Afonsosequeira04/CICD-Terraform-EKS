@@ -74,9 +74,16 @@ pipeline {
             steps {
                 script {
                     dir('EKS/configuration-files') {
-                        sh 'aws eks update-kubeconfig --name my-eks-cluster'
-                        sh 'kubectl apply -f deployment.yml'
-                        sh 'kubectl apply -f service.yml'
+                        withCredentials([
+                            string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
+                            string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
+                        ]) {
+                            sh '''
+                                aws eks update-kubeconfig --name my-eks-cluster
+                                kubectl apply -f deployment.yml
+                                kubectl apply -f service.yml
+                            '''
+                        }
                     }
                 }
             }

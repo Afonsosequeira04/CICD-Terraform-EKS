@@ -73,11 +73,8 @@ pipeline {
         stage('Deploying Nginx') {
             steps {
                 script {
-                    dir('EKS/configuration-files') {
-                        withCredentials([
-                            string(credentialsId: 'AWS_ACCESS_KEY_ID', variable: 'AWS_ACCESS_KEY_ID'),
-                            string(credentialsId: 'AWS_SECRET_ACCESS_KEY', variable: 'AWS_SECRET_ACCESS_KEY')
-                        ]) {
+                    
+                dir('EKS/configuration-files') {
                             sh '''
                                 aws eks update-kubeconfig --name my-eks-cluster
                                 kubectl apply -f deployment.yml --validate=false || true
@@ -90,5 +87,5 @@ pipeline {
         }
    
     }
-}
+
 
